@@ -15,7 +15,8 @@
     "ytdl-core": "^4.10.0"
   },
   "scripts": {
-    "server": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "server": "node index.js"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
