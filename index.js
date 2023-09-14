@@ -18,13 +18,13 @@ export const openai = new OpenAI(({
 
 const io = new Server(server, {
   cors: {
-    origin: "https://www.youtube.com/shorts/e2o8-6cjvJw",
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
 
 app.use(cors({
-  origin: 'https://shorts-summary.w3spaces.com', // Substitua pelo seu domínio permitido
+  origin: '*', // Substitua pelo seu domínio permitido
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true, // Habilita o uso de credenciais (por exemplo, cookies)
 }));
