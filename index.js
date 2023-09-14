@@ -5,7 +5,7 @@ import fs from "fs";
 import ytdl from "ytdl-core";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
-import { OpenAI } from "openai"
+import { OpenAI } from "openai";
 
 const app = express();
 const server = createServer(app);
@@ -18,15 +18,18 @@ export const openai = new OpenAI(({
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "https://www.youtube.com/shorts/e2o8-6cjvJw",
     methods: ["GET", "POST"]
   }
 });
 
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST"]
-}));
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*'); // Permitir qualquer origem
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+
 app.use(express.json());
 
 async function transcribeAudioOpenai(archive) {
