@@ -19,7 +19,9 @@ export const openai = new OpenAI(({
 const io = new Server(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST"],
+    preflightContinue: false,
+    allowedHeaders: "*"
   }
 });
 
@@ -27,7 +29,7 @@ app.use((request, response, next) => {
   response.setHeader("Access-Control-Allow-Origin", "*");
   response.setHeader("Access-Control-Allow-Credentials", "true");
   response.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-  response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  response.setHeader("Access-Control-Allow-Headers", "*");
   next();
 });
 
