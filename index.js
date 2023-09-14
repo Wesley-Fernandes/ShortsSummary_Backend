@@ -23,12 +23,12 @@ const io = new Server(server, {
   }
 });
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*'); // Permitir qualquer origem
-  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
+app.use(cors({
+  origin: 'https://shorts-summary.w3spaces.com', // Substitua pelo seu domínio permitido
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true, // Habilita o uso de credenciais (por exemplo, cookies)
+}));
+
 
 app.use(express.json());
 
