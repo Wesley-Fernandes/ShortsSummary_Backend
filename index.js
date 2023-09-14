@@ -20,10 +20,10 @@ const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
-    preflightContinue: false,
-    allowedHeaders: "*"
   }
 });
+
+app.use(cors());
 
 app.use((request, response, next) => {
   response.setHeader("Access-Control-Allow-Origin", "*");
