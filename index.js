@@ -1,13 +1,20 @@
+import 'dotenv/config'
 import express from "express";
 import cors from "cors";
 import fs from "fs";
 import ytdl from "ytdl-core";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
-import { openai } from "./openai.js";
+import { OpenAI } from "openai"
 
 const app = express();
 const server = createServer(app);
+
+
+export const openai = new OpenAI(({
+  apiKey: process.env.OPENAI
+}));
+
 
 const io = new Server(server, {
   cors: {
