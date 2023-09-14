@@ -16,7 +16,12 @@ export const openai = new OpenAI(({
 }));
 
 
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: "*"
+  }
+});
+
 
 app.use(cors());
 
