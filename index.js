@@ -45,8 +45,9 @@ async function resumeTranscription(transcription) {
     1 - É o texto sobre um vídeo.\n
     2 - Crie um resumo dele sem fazer perguntas.\n
     3 - Não invente nada, apenas use o conteudo do video.\n
-    4 - Não escreva 'Resumo:' no inicio do resumo.
-    5 - Não repita o texto que você deve resumir, crie o resumo total.
+    4 - Não escreva 'Resumo:' no inicio do resumo.\n
+    5 - Não repita o texto que você deve resumir, crie o resumo total.\n
+    6 - Apenas me envie a resposta, nada além.
     \n\n
 
     Abaixo é o texto do vídeo que você deve resumir:
