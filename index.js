@@ -29,6 +29,7 @@ app.use(cors({
 
 
 app.use(express.json());
+const connectedUsers = {};
 
 async function transcribeAudioOpenai(archive) {
   const transcription = await openai.audio.transcriptions.create({
@@ -42,11 +43,16 @@ async function transcribeAudioOpenai(archive) {
 async function resumeTranscription(transcription) {
   const resume = await openai.completions.create({
     model: "text-davinci-003",
-    prompt: `Sabendo que isso é o texto de um vídeo, crie um resumo dele, igual o exemplo abaixo:
-          Esse vídeo fala sobre um canal de culinária que...
+    prompt: `
+    1 - É o texto sobre um vídeo.\n
+    2 - Crie um resumo dele sem fazer perguntas.\n
+    3 - Não invente nada, apenas use o conteudo do video.\n
+    4 - Não escreva 'Resumo:' no inicio do resumo.
+    5 - Não repita o texto que você deve resumir, crie o resumo total.
+    \n\n
 
-          Agora é o texto do vídeo:
-      :\n\n ${transcription}`,
+    Abaixo é o texto do vídeo que você deve resumir:
+    \n\n ${transcription}`,
     max_tokens: 500,
     temperature: 0
   });
@@ -54,16 +60,34 @@ async function resumeTranscription(transcription) {
   return resume.choices[0].text;
 }
 
+function getUserIdBySocketId(socketId) {
+  for (const userId in connectedUsers) {
+    if (connectedUsers[userId] === socketId) {
+      return userId;
+    }
+  }
+  return null;
+}
+
 io.on("connection", async (socket) => {
-  const socketID = socket.id;
-  console.log(`Um cliente se conectou: ${socketID}`);
-  io.to(socketID).emit("status", "Em espera...");
+  connectedUsers[socket.id] = socket.id;
+  console.log(connectedUsers)
+  io.to(socket.id).emit("status", "pausado");
+
+  app.get("/", (req, res) => {
+    res.json({ status: true });
+  });
+
+  socket.on('disconnect', () => {
+    const disconnectedUserId = getUserIdBySocketId(socket.id);
+    if (disconnectedUserId) {
+      delete connectedUsers[disconnectedUserId];
+    }
+  });
 
   app.post("/summary/:id", async (request, response) => {
-    let register = request.body.register;
-
-    io.to(socketID).emit("status", "Work.");
-
+    let register = request.body.register; 
+    socket.to(register).emit("status", "Solicitando...");
     try {
       const id = request.params.id;
       const videoURL = `https://www.youtube.com/shorts/${id}`;
@@ -75,35 +99,34 @@ io.on("connection", async (socket) => {
 
           if (seconds >= 60) {
             const error = "O vídeo é maior que 60 segundos.";
-            socket.to(socketID).emit("status", error);
+            socket.to(register).emit("status", "Pausado.");
             return response.send(error);
           }
-
-          io.to(socketID).emit("status", "Fazendo download...");
+          socket.to(register).emit("status", "Fazendo download...");
         })
         .on("end", async () => {
           try {
+            console.log({socket: register})
             async function startProcess(response) {
               const archive = fs.createReadStream("./temp/audio.mp4");
-              io.to(socketID).emit("status", "Transcrevendo vídeo...");
+              socket.to(register).emit("status", "Transcrevendo...");
               const transcript = await transcribeAudioOpenai(archive);
-              io.to(socketID).emit("status", "Criando resumo do vídeo...");
+              socket.to(register).emit("status", "Resumindo...");
               const resume = await resumeTranscription(transcript);
-              io.to(socketID).emit("status", "Concluído.");
               return response.send(resume);
             }
 
             await startProcess(response);
           } catch (error) {
-            return response.send({ error });
+            return response.status(401).json({ error });
           }
         })
         .on("error", (error) => {
-          return response.send({ error });
+          return response.status(401).json({ error });
         })
         .pipe(writeStream);
     } catch (error) {
-      return response.send({ error });
+      return response.status(401).json({ error });
     }
   });
 });
