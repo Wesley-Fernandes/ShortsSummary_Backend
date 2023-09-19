@@ -23,9 +23,7 @@ const io = new Server(server, {
 });
 
 
-app.use(cors({
-  origin: "*"
-}));
+app.use(cors());
 
 
 app.use(express.json());
@@ -86,7 +84,7 @@ io.on("connection", async (socket) => {
   });
 
   app.post("/summary/:id", async (request, response) => {
-    let register = request.body.register; 
+    let register = request.body.register;
     socket.to(register).emit("status", "Solicitando...");
     try {
       const id = request.params.id;
@@ -106,7 +104,7 @@ io.on("connection", async (socket) => {
         })
         .on("end", async () => {
           try {
-            console.log({socket: register})
+            console.log({ socket: register })
             async function startProcess(response) {
               const archive = fs.createReadStream("./temp/audio.mp4");
               socket.to(register).emit("status", "Transcrevendo...");
